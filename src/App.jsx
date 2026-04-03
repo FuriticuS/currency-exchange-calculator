@@ -1,25 +1,22 @@
 import React, {useEffect, useState} from "react";
 import "./index.css";
 
-// 3 - Получите значения выбранных валют из обоих select и запишите их в state fromCurrency и toCurrency.
-// 4 - Создайте state для записи amount из input. Запишите данные из input в этот state.
-// 5 - Создайте вторую асинхронную функцию для получения значения конвертации двух валют. Запишите результат конвертации в новый state - convertedAmount. Покажите результат в интерфейсе.
-// 6 - Добавьте в обе функции блоки try/catch/finally. Создайте state для loading (true/false) и error ("Сообщение ошибки").
-// 7 - Внедрите логику отображения загрузки и ошибок в интерфейсе.
 // 8 - Добавьте проверку, чтобы amount был больше 0.
-
-//https://api.frankfurter.app/latest?amount=100&from=EUR&to=USD
 
 const API_URL = "https://api.frankfurter.app";
 
 function App() {
   const [currency, setCurrency] = useState([]);
-  const [fromCurrency, setFromCurrency] = useState('')
-  const [toCurrency, setToCurrency] = useState('')
+  const [fromCurrency, setFromCurrency] = useState('AUD')
+  const [toCurrency, setToCurrency] = useState('AUD')
   const [amount, setAmount] = useState('')
+  const [convertedAmount, setConvertedAmount] = useState('')
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function currencyData()  {
+      setLoading(true)
       try{
         const resp = await fetch(API_URL + '/latest')
         if(!resp.ok){
@@ -31,22 +28,45 @@ function App() {
 
       }catch(err){
         console.error(err);
+      }finally{
+        setLoading(false)
       }
     }
 
     currencyData()
   },[])
 
+  async function convertCurrency() {
+    if(amount.trim() >= 0 || fromCurrency === toCurrency){
+      setError("Amount = 0 or the currency is the same");
+      return
+    }
+    setLoading(true)
+     try{
+       const respCur = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`)
+       if(!respCur){
+         throw new Error("Error fetching currency data.");
+       }
+
+       const dataCur = await respCur.json();
+       setError(null)
+       setConvertedAmount(dataCur?.rates[toCurrency])
+     }catch(err){
+       console.error(err);
+       setError(err)
+     }finally{
+       setLoading(false)
+     }
+  }
+
   console.log(fromCurrency,
   toCurrency,
-  amount)
+  amount, convertedAmount)
   return (
     <div className="app">
       <h1>Currency Exchange Calculator</h1>
 
       <div className="converter-container">
-        <p className="error"></p>
-
         <div className="input-group">
           <input type="number" placeholder="Amount" className="input-field" onChange={(e)=> setAmount(e.target.value)}/>
           <select className="dropdown" onChange={(e) => setFromCurrency(e.target.value)}>
@@ -57,10 +77,11 @@ function App() {
             {currency.map(cur => <option key={cur}>{cur}</option>)}
           </select>
         </div>
-        <button className="convert-button">Convert</button>
-        <p className="loading">Converting...</p>
+        <button className="convert-button" onClick={convertCurrency}>Convert</button>
 
-        <p className="result"></p>
+        {loading && <p className="loading">Converting...</p>}
+        {!loading && error && <p className="error">{error}</p>}
+        {!loading && !error && convertedAmount && <p className="result">Sum = {convertedAmount}</p>}
       </div>
     </div>
   );
