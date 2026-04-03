@@ -35,7 +35,7 @@ function App() {
   },[])
 
   async function convertCurrency() {
-    if(amount.trim() >= 0 || fromCurrency === toCurrency){
+    if(!amount || fromCurrency === toCurrency){
       setError("Amount = 0 or the currency is the same");
       return
     }
@@ -63,20 +63,20 @@ function App() {
 
       <div className="converter-container">
         <div className="input-group">
-          <input type="number" placeholder="Amount" className="input-field" onChange={(e)=> setAmount(e.target.value)}/>
-          <select className="dropdown" onChange={(e) => setFromCurrency(e.target.value)}>
-            {currency.map(cur => <option key={cur}>{cur}</option>)}
+          <input type="number" placeholder="Amount" className="input-field" value={amount} onChange={(e)=> setAmount(e.target.value)}/>
+          <select className="dropdown" value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+            {currency.map(cur => <option value={cur} key={cur}>{cur}</option>)}
           </select>
           <span className="arrow">→</span>
-          <select className="dropdown" onChange={(e) => setToCurrency(e.target.value)}>
-            {currency.map(cur => <option key={cur}>{cur}</option>)}
+          <select className="dropdown" value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+            {currency.map(cur => <option value={cur} key={cur}>{cur}</option>)}
           </select>
         </div>
         <button className="convert-button" onClick={convertCurrency}>Convert</button>
 
         {loading && <p className="loading">Converting...</p>}
         {!loading && error && <p className="error">{error}</p>}
-        {!loading && !error && convertedAmount && <p className="result">Sum = {convertedAmount}</p>}
+        {!loading && !error && convertedAmount && <p className="result">{amount} {`${fromCurrency} ${toCurrency}`} = {convertedAmount.toFixed(2)}</p>}
       </div>
     </div>
   );
