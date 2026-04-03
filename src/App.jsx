@@ -1,8 +1,6 @@
 import React, {useEffect, useState} from "react";
 import "./index.css";
 
-// 8 - Добавьте проверку, чтобы amount был больше 0.
-
 const API_URL = "https://api.frankfurter.app";
 
 function App() {
@@ -59,9 +57,6 @@ function App() {
      }
   }
 
-  console.log(fromCurrency,
-  toCurrency,
-  amount, convertedAmount)
   return (
     <div className="app">
       <h1>Currency Exchange Calculator</h1>
